@@ -26,7 +26,11 @@ class YouTubeUploader:
 
     def __init__(self, video_path: str, metadata_json_path: Optional[str] = None) -> None:
         self.video_path = video_path
-        self.metadata_dict = load_metadata(metadata_json_path)
+        
+        metadata_dict = load_metadata(metadata_json_path)
+        self.meta_title = metadata_dict[Constant.VIDEO_TITLE]
+        self.meta_description = metadata_dict[Constant.VIDEO_DESCRIPTION]
+        
         current_working_dir = str(Path.cwd())
         self.browser = Firefox(current_working_dir, current_working_dir)
         self.logger = logging.getLogger(__name__)
@@ -34,11 +38,11 @@ class YouTubeUploader:
         self.__validate_inputs()
 
     def __validate_inputs(self):
-        if not self.metadata_dict[Constant.VIDEO_TITLE]:
+        if not self.meta_title:
             self.logger.warning("The video title was not found in a metadata file")
-            self.metadata_dict[Constant.VIDEO_TITLE] = Path(self.video_path).stem
+            self.meta_title = Path(self.video_path).stem
             self.logger.warning("The video title was set to {}".format(Path(self.video_path).stem))
-        if not self.metadata_dict[Constant.VIDEO_DESCRIPTION]:
+        if not self.meta_description:
             self.logger.warning("The video description was not found in a metadata file")
 
     def upload(self):
@@ -80,10 +84,10 @@ class YouTubeUploader:
         time.sleep(Constant.USER_WAITING_TIME)
         title_field.send_keys(Keys.COMMAND + 'a')
         time.sleep(Constant.USER_WAITING_TIME)
-        title_field.send_keys(self.metadata_dict[Constant.VIDEO_TITLE])
-        self.logger.debug('The video title was set to \"{}\"'.format(self.metadata_dict[Constant.VIDEO_TITLE]))
+        title_field.send_keys(self.meta_title)
+        self.logger.debug('The video title was set to \"{}\"'.format(self.meta_title))
 
-        video_description = self.metadata_dict[Constant.VIDEO_DESCRIPTION]
+        video_description = self.meta_description
         if video_description:
             description_container = self.browser.find(By.XPATH,
                                                       Constant.DESCRIPTION_CONTAINER)
@@ -92,9 +96,9 @@ class YouTubeUploader:
             time.sleep(Constant.USER_WAITING_TIME)
             description_field.clear()
             time.sleep(Constant.USER_WAITING_TIME)
-            description_field.send_keys(self.metadata_dict[Constant.VIDEO_DESCRIPTION])
+            description_field.send_keys(self.meta_description)
             self.logger.debug(
-                'The video description was set to \"{}\"'.format(self.metadata_dict[Constant.VIDEO_DESCRIPTION]))
+                'The video description was set to \"{}\"'.format(self.meta_description))
 
         kids_section = self.browser.find(By.NAME, Constant.NOT_MADE_FOR_KIDS_LABEL)
         self.browser.find(By.ID, Constant.RADIO_LABEL, kids_section).click()
