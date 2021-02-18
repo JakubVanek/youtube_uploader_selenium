@@ -6,6 +6,10 @@ class Constant:
     USER_WAITING_TIME = 1
     VIDEO_TITLE = 'title'
     VIDEO_DESCRIPTION = 'description'
+    VIDEO_VISIBILITY = 'visibility'
+    VIDEO_VISIBILITY_PUBLIC = 'public'
+    VIDEO_VISIBILITY_PRIVATE = 'private'
+    VIDEO_VISIBILITY_UNLISTED = 'unlisted'
     DESCRIPTION_CONTAINER = '/html/body/ytcp-uploads-dialog/paper-dialog/div/ytcp-animatable[1]/' \
                             'ytcp-uploads-details/div/ytcp-uploads-basics/ytcp-mention-textbox[2]'
     MORE_OPTIONS_CONTAINER = '/html/body/ytcp-uploads-dialog/paper-dialog/div/ytcp-animatable[1]/' \
@@ -18,6 +22,8 @@ class Constant:
     NOT_MADE_FOR_KIDS_LABEL = 'NOT_MADE_FOR_KIDS'
     NEXT_BUTTON = 'next-button'
     PUBLIC_BUTTON = 'PUBLIC'
+    UNLISTED_BUTTON = 'UNLISTED'
+    PRIVATE_BUTTON = 'PRIVATE'
     VIDEO_URL_CONTAINER = "//span[@class='video-url-fadeable style-scope ytcp-video-info']"
     VIDEO_URL_ELEMENT = "//a[@class='style-scope ytcp-video-info']"
     HREF = 'href'

@@ -19,6 +19,11 @@ def load_metadata(metadata_json_path: Optional[str] = None) -> DefaultDict[str, 
     with open(metadata_json_path) as metadata_json_file:
         return defaultdict(str, json.load(metadata_json_file))
 
+VisibilityMapping = [
+    VIDEO_VISIBILITY_PUBLIC: PUBLIC_BUTTON,
+    VIDEO_VISIBILITY_PRIVATE: PRIVATE_BUTTON,
+    VIDEO_VISIBILITY_UNLISTED: UNLISTED_BUTTON,
+]
 
 class YouTubeUploader:
     """A class for uploading videos on YouTube via Selenium using metadata JSON file
@@ -30,6 +35,7 @@ class YouTubeUploader:
         metadata_dict = load_metadata(metadata_json_path)
         self.meta_title = metadata_dict[Constant.VIDEO_TITLE]
         self.meta_description = metadata_dict[Constant.VIDEO_DESCRIPTION]
+        self.meta_visibility = metadata_dict[Constant.VIDEO_VISIBILITY]
         
         current_working_dir = str(Path.cwd())
         self.browser = Firefox(current_working_dir, current_working_dir)
@@ -44,6 +50,16 @@ class YouTubeUploader:
             self.logger.warning("The video title was set to {}".format(Path(self.video_path).stem))
         if not self.meta_description:
             self.logger.warning("The video description was not found in a metadata file")
+
+        # public was the previous default behaviour
+        if not self.meta_visibility:
+            self.logger.warning("Video visibility was not specified in the metadata file, defaulting to public.")
+            self.meta_visibility = VIDEO_VISIBILITY_PUBLIC
+
+        # but fail safe/private when visibility is actually used
+        if self.meta_visibility not in VisibilityMapping:
+            self.logger.warning("Invalid video visibility was specified in the metadata file, defaulting to private.")
+            self.meta_visibility = VIDEO_VISIBILITY_PRIVATE
 
     def upload(self):
         try:
@@ -110,9 +126,10 @@ class YouTubeUploader:
         self.browser.find(By.ID, Constant.NEXT_BUTTON).click()
         self.logger.debug('Clicked another {}'.format(Constant.NEXT_BUTTON))
 
-        public_main_button = self.browser.find(By.NAME, Constant.PUBLIC_BUTTON)
-        self.browser.find(By.ID, Constant.RADIO_LABEL, public_main_button).click()
-        self.logger.debug('Made the video {}'.format(Constant.PUBLIC_BUTTON))
+        visibility_button_name = VisibilityMapping[self.meta_visibility]
+        visibility_button = self.browser.find(By.NAME, visibility_button_name)
+        self.browser.find(By.ID, Constant.RADIO_LABEL, visibility_button).click()
+        self.logger.debug('Made the video {}'.format(visibility_button_name))
 
         video_id = self.__get_video_id()
 
